@@ -1,27 +1,13 @@
-from PyXTBClient.client import XTBClient
-from PyXTBClient.settings import XTB_USER, XTB_PASS
+def test_get_symbols(xtb_client):
+    symbols = xtb_client.get_all_symbols()
+    assert isinstance(symbols, list)
 
 
-class TestBasicFunctionality:
-    client = None
+def test_get_balance(xtb_client):
+    balance = xtb_client.get_balance()
+    assert balance.get('balance') is not None
 
-    @classmethod
-    def setup_class(cls):
-        print('Setting up')
-        cls.client = XTBClient()
-        logged_in_msg = cls.client.login(XTB_USER, XTB_PASS)
-        assert logged_in_msg.get('status') is True
 
-    def test_get_symbols(self):
-        symbols = self.client.get_all_symbols()
-        assert isinstance(symbols, list)
-
-    def test_get_balance(self):
-        balance = self.client.get_balance()
-        assert balance.get('balance') is not None
-
-    @classmethod
-    def teardown_class(cls):
-        print("tearing down")
-        response = cls.client.logout()
-        assert response
+def test_ping(xtb_client):
+    response = xtb_client.ping()
+    assert response

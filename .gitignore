@@ -112,3 +112,6 @@ dmypy.json
 
 # Mac stuff
 .DS_Store
+
+# Local variables file
+local.py
