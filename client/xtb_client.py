@@ -5,6 +5,9 @@ import logging
 import socket
 import ssl
 
+from client.constants import Period
+from client.models import RateInfoRecord
+
 logger = logging.getLogger('XTBClient')
 logger.setLevel(os.environ.get('XTB_LOG_LEVEL') or logging.DEBUG)
 
@@ -80,7 +83,7 @@ class XTBClient:
         :param ret_format: can be either json or raw to get the answer back
         :return: response from the XTB server
         """
-        payload = {"command": command}
+        payload = {"command": command, "prettyPrint": True}
         if kwargs:
             payload.update({self._to_camel_case(k): v for k, v in kwargs.items()})
         if arguments:
@@ -145,3 +148,31 @@ class XTBClient:
     def get_all_symbols(self):
         """Returns array of all symbols available for the user"""
         return self._send_action("getAllSymbols").get('returnData')
+
+    def get_chart_range_request(self, symbol, start, end, period=Period.h4, ticks=0):
+        """Returns chart info with data between given start and end dates.
+        :param symbol {string} Symbol
+        :param start {timestamp} Start of chart block (rounded down to the nearest interval and excluding)
+        :param end {timestamp} Time	End of chart block (rounded down to the nearest interval and excluding)
+        :param period {int}	Number of minutes for the period, please use Period class on constants
+        :param ticks {int} Number of ticks needed, this field is optional
+                Ticks field - if ticks is not set or value is 0, getChartRangeRequest works as before (you must send valid start and end time fields).
+                If ticks value is not equal to 0, field end is ignored.
+                If ticks >0 (e.g. N) then API returns N candles from time start.
+                If ticks <0 then API returns N candles to time start.
+                It is possible for API to return fewer chart candles than set in tick field.
+        :return [RateInfoRecord]
+        """
+        res = self._send_action("getChartRangeRequest", arguments={
+            'info': {
+                "end": end,
+                "period": period,
+                "start": start,
+                "symbol": symbol,
+                "ticks": ticks
+            }})
+        if res.get('status') is not True:
+            raise ValueError('Some error getting the response {}'.format(res))
+        return_data = res.get('returnData')
+        digits = res.get('digits')
+        return [RateInfoRecord(digits=digits, **info) for info in return_data.get('rateInfos')]
