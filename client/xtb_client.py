@@ -6,7 +6,7 @@ import socket
 import ssl
 
 from client.constants import Period
-from client.models import RateInfoRecord
+from client.models import RateInfoRecord, Symbol
 
 logger = logging.getLogger('XTBClient')
 logger.setLevel(os.environ.get('XTB_LOG_LEVEL') or logging.DEBUG)
@@ -17,8 +17,8 @@ class XTBClient:
         """
         X-Trades Broker client
         :param host: host of the demo or real servers (by default demo: 'xapia.x-station.eu')
-        :param port: port of the demo or real servers (by default demo: 5124)
-        :param stream_port: streaming port of the demo or real servers (by default demo: 5125)
+        :param port: port of the demo or real servers (by default demo: 5144)
+        :param stream_port: streaming port of the demo or real servers (by default demo: 5145)
         """
         # replace host name with IP, this should fail connection attempt,
         # but it doesn't in Python 2.x
@@ -147,7 +147,8 @@ class XTBClient:
 
     def get_all_symbols(self):
         """Returns array of all symbols available for the user"""
-        return self._send_action("getAllSymbols").get('returnData')
+        for data in self._send_action("getAllSymbols").get('returnData'):
+            yield Symbol(**data)
 
     def get_chart_range_request(self, symbol, start, end, period=Period.h4, ticks=0):
         """Returns chart info with data between given start and end dates.

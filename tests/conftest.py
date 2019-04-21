@@ -8,7 +8,7 @@ import pytest
 def xtb_client():
     client = XTBClient()
     logged_in_msg = client.login(XTB_USER, XTB_PASS)
-    assert logged_in_msg.get('status') is True
+    assert logged_in_msg.get('status') is True, 'Error code {}'.format(logged_in_msg.get('errorCode'))
     yield client
     response = client.logout()
     print('logging out info {}'.format(response))

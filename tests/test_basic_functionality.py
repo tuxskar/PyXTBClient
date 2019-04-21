@@ -1,6 +1,6 @@
 def test_get_symbols(xtb_client):
-    symbols = xtb_client.get_all_symbols()
-    assert isinstance(symbols, list)
+    symbols = list(xtb_client.get_all_symbols())
+    assert len(symbols) > 0
 
 
 def test_get_balance(xtb_client):
