@@ -157,7 +157,8 @@ class XTBClient:
         :param end {timestamp} Time	End of chart block (rounded down to the nearest interval and excluding)
         :param period {int}	Number of minutes for the period, please use Period class on constants
         :param ticks {int} Number of ticks needed, this field is optional
-                Ticks field - if ticks is not set or value is 0, getChartRangeRequest works as before (you must send valid start and end time fields).
+                Ticks field - if ticks is not set or value is 0, getChartRangeRequest works as before
+                (you must send valid start and end time fields).
                 If ticks value is not equal to 0, field end is ignored.
                 If ticks >0 (e.g. N) then API returns N candles from time start.
                 If ticks <0 then API returns N candles to time start.
@@ -175,5 +176,5 @@ class XTBClient:
         if res.get('status') is not True:
             raise ValueError('Some error getting the response {}'.format(res))
         return_data = res.get('returnData')
-        digits = res.get('digits')
-        return [RateInfoRecord(digits=digits, **info) for info in return_data.get('rateInfos')]
+        digits = return_data.get('digits')
+        return [RateInfoRecord(digits=digits, symbol=symbol, raw=True, **info) for info in return_data.get('rateInfos')]

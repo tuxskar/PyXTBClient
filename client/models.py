@@ -2,7 +2,7 @@ from client.constants import MarginMode, ProfitMode
 
 
 class RateInfoRecord:
-    def __init__(self, close, ctm, ctmString, high, low, open, vol, digits=0):
+    def __init__(self, close, ctm, ctmString, high, low, open, vol, digits=0, symbol=None, raw=False):
         """ Rate information record
         :param close {float} Value of close price (shift from open price)
         :param ctm	{timestamp}	Candle start time in CET / CEST time zone (see Daylight Saving Time, DST)
@@ -14,15 +14,26 @@ class RateInfoRecord:
         :param open	{float} Open price (in base currency * 10 to the power of digits)
         :param vol	{float} Volume in lots
         :param digits {int}
+        :param symbol {str} Symbol that the records belongs to
+        :param raw {bool} If raw means that there is a need to convert the values of close, high, low as they are
+                    relative to the open price and must be adjusted
         """
+        self.open = open
         self.close = close
-        self.ctm = ctm
-        self.ctm_string = ctmString
         self.high = high
         self.low = low
-        self.open = open
-        self.volume = vol
         self.digits = digits
+        self.symbol = symbol
+        self.ctm = ctm
+        self.ctm_string = ctmString
+        self.volume = vol
+
+        if raw:
+            divisor = 1 if not digits else 1/pow(10, digits)
+            self.open = round(open * divisor, digits)
+            self.close = round(self.open + (self.close * divisor), digits)
+            self.high = round(self.open + (self.high * divisor), digits)
+            self.low = round(self.open + (self.low * divisor), digits)
 
     def __repr__(self):
         return '{}'.format(self.__dict__)
